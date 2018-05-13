@@ -1,0 +1,78 @@
+ssh student@study.zoidberg.md
+123454321
+
+scp nvidia.ko
+
+scp /home/alexander/.ssh/id_rsa.pub student@study.zoidberg.md:petrovski.key
+
+ls | grep '.key$' | sed 's/.key$//' | while read S ; do useradd -m $S; done 
+// $ - сивмол конца строки
+
+ls | grep '.key$' | sed 's/.key$//' | while read S ; do mkdir /home/$S/.ssh/ ; done 
+
+ls | grep '.key$' | sed 's/.key$//' | while read S ; do cp $S.key /home/$S/.ssh/authorized_keys : chown -R $S:$S /home/$S/.ssh ; done 
+// 
+
+Теперь мы заходим без пароля 
+ssh petrovski@study.zoidberg.md
+
+Будем испытывать git
+
+mkdir repo
+cd repo
+
+git init --bare // без него все будет работать, пока не будет checkout'ить, когда мы будем пушить, то гит будет тупить, но в целом решит что-то за долго.
+
+In my system do cloning:
+git clone petrovski@study.zoidberg.md:repo
+
+vim Makefile
+git add Makefile
+git commit -m "add Makefile"
+git push
+
+On server:
+cd hooks
+vim post-update.sample
+man githook
+//create file writing meow
+vim update
+```
+#!/bin/bash
+
+echo "meow"
+```
+chmod -x update
+
+Теперь когда мы сделаем сделаем push с нашей системы, то у нас выведется сообщение какое-то
+Как-то меняем Makefile, после чего его коммитим
+On system:
+vim Makefile // change somehow
+git add Makefile
+git commit -m "Add Makefile 2"
+git push 
+```
+Counting objects: 3, done. 
+Writing objects: 100% (3/3), 248 bytes | 0 bytes/s, done. 
+Total 3 (delta 0), reused 0 (delta 0) 
+remote: meow 
+To petrovski@study.zoidberg.md:repo 
+   ebf6639..d3047df  master -> master 
+```
+
+HW нужно написать софт, который будет проверять нулевую домашку
+
+/////
+Stricky-bit SUID SGID 
+---Для файлов---
+Эти флаги позволяют изменить права пользователя пр запуске на выполнение файла, имеющего эти атрибуты на время выполнения и только в отношении этой программы. (ОБычно программы получает права доступа к системным ресурсам на основе прав доступа пользователя, который запустил эту программу, а тут можно использовать права доступа владельца или группы соответственно)
+В качестве пример можно посмотреть на passwd (/usr/bin/passwd);
+-rwsr-xr-x 1 root root 54256 May 17  2017 passwd
+То есть кто бы не запустил эту утилиту, он будет временно владеть правами суперпользователя и записывать в системные файлы.
+Stricky bit почти бесполезен - он сохраняет обрах выполняемого файла в память после завершения выполнения 
+---Для каталогов---
+Stricky-bit позволяет пользователю удалять только файлы, которыми он владеет или имеет права на запись, без этого бита если у папки есть w, то любой пользователь может удалить файл, на который не имеет никаких прав. например /tmp
+drwxrwxrwt  17 root root 12288 Apr 26 20:27 tmp/
+SUID SGID - позволяет изменить правило установки владельца группы создаваемых файлов, аналогично BSD UNIX (наследование) 
+
+Говоря о флагах SUID и SGID нужно сказать, что при их установке меняется атрибут процесса, для программы RID (реальный) остается идентификатором пользователя, а EUID (эффективный), который обычно равен реальному, меняется на соответствующий новому флагу.
