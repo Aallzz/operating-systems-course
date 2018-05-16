@@ -1,7 +1,7 @@
 To unzip all projects you can use unpack.sh.
 
 Status: 
-  Shell       [unchecked]
+  Shell       [checked]
   Grep        [unchecked]
 
 Description: 
