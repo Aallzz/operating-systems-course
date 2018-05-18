@@ -24,4 +24,5 @@ unpack:
 	for dir in $(DIRS); do \
 	  cd $$dir && unzip *.zip && rm -rf *.zip && cd ..; \
 	done
-	chmod u+x unpack.sh
+	chmod 755 unpack.sh
+	echo "unpacked"

@@ -152,7 +152,7 @@ void compile_pattern(const char *pat)
   }
 }
 
-int get_inode(FILE* fp) {
+int get_inodev(FILE* fp) {
   int fd = fileno(fp);	
   struct stat buf;
   int ret;
@@ -163,7 +163,7 @@ int get_inode(FILE* fp) {
     return -1;
   }
 
-  return buf.st_ino;
+  return buf.st_ino + buf.st_dev;
 }
 
 void process(const char *name, FILE *fp)
@@ -173,10 +173,10 @@ void process(const char *name, FILE *fp)
   char error[MSGBUFSIZE];
   int ret;
   
-  if (check_value_in_hash_table(calc_hash(get_inode(fp)), get_inode(fp))) {
+  if (check_value_in_hash_table(calc_hash(get_inodev(fp)), get_inodev(fp))) {
     return ;
   }
-  add_value_in_hash_table(calc_hash(get_inode(fp)), get_inode(fp));
+  add_value_in_hash_table(calc_hash(get_inodev(fp)), get_inodev(fp));
 
   while (getline(& buf, &size, fp) != -1) {
   	ret = regexec(& pattern, buf, 0, NULL, 0);
@@ -206,10 +206,10 @@ int is_regular_file(const char* path) {
   return S_ISREG(path_stat.st_mode);
 }
 
-int get_inode_by_name(const char* path) {
+int get_inodev_by_name(const char* path) {
   struct stat path_stat;
   stat(path, &path_stat);
-  return path_stat.st_ino;
+  return path_stat.st_ino + path_stat.st_dev;
 }
 
 void revursive_walk() {
@@ -239,13 +239,13 @@ void revursive_walk() {
       continue;
     }
     
-    if (check_value_in_hash_table(calc_hash(get_inode_by_name(dir)), 
-                                  get_inode_by_name(dir))) {  
+    if (check_value_in_hash_table(calc_hash(get_inodev_by_name(dir)), 
+                                  get_inodev_by_name(dir))) {  
       closedir(dp);
       continue;
     }
-    add_value_in_hash_table(calc_hash(get_inode_by_name(dir)),     
-                            get_inode_by_name(dir));
+    add_value_in_hash_table(calc_hash(get_inodev_by_name(dir)),     
+                            get_inodev_by_name(dir));
      
     while((entry = readdir(dp)) != NULL) {
       if(strcmp(".", entry->d_name) == 0 || strcmp("..", entry->d_name) == 0)

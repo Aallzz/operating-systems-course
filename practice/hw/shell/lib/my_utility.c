@@ -21,7 +21,8 @@ int read_line_buffer(struct string_buffer* buffer, FILE* from) {
 void split_buffer(struct string_buffer const * const buffer, char*** res, int* sz) {
   char* temp = strdup(buffer->buf);
   *sz = 0;
-  temp[strlen(temp) - 1] = '\0';
+  if (temp[strlen(temp) - 1] == '\n')
+    temp[strlen(temp) - 1] = '\0';
   char* token = strtok(temp, " \t");
   int capacity = 1;
   *res = (char**)realloc(*res, sizeof(char*));

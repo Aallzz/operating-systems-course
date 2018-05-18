@@ -3,7 +3,7 @@
 if ![ ! -f hw.zip ]; then
   unzip hw.zip
 fi
-chmod u+z unpack.sh
+chmod u+x unpack.sh
 make unpack
 
 
