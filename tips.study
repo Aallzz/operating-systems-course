@@ -33,8 +33,9 @@ useful vim commands {{{
 " folding regions {{{
   zc - close region
   zo - open region
-" }}}
+" }}l}
 
+  :set spell spelllang=en_us - check spelling
 " }}}
 
 info sources {{{

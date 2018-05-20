@@ -29,6 +29,9 @@ struct jit_funtction {
       if (is_operation(token)) {
         uint8_t idx1 {std::min<uint8_t>(cnt_reg - 1, max_cnt_reg)};
         uint8_t idx2 {std::min<uint8_t>(cnt_reg, max_cnt_reg + 1)};
+        if (cnt_reg < 2) {
+          throw std::invalid_argument(std::string("Operation ") + token + std::string(" needs two operands")); 
+        }
         if (cnt_reg >= max_cnt_reg) { 
           append(pop_xmm(max_cnt_reg));
         }
@@ -40,7 +43,7 @@ struct jit_funtction {
           append(push_xmm(max_cnt_reg));
         }
         cnt_reg--;
-      } else if (token[0] == 'x') {
+      } else if (token == "x") {
         if (cnt_reg + 1 >= max_cnt_reg) {
           append(push_xmm(0));
         } else {
@@ -55,7 +58,7 @@ struct jit_funtction {
         }
         cnt_reg++;
       } else {
-        throw std::exception();
+        throw std::invalid_argument(std::string("Unexpected token in expression: ") + token);
       }
 
     }
@@ -111,7 +114,15 @@ private:
   }
 
   bool is_double(std::string const& str) const {
-    return (isdigit(str[0]) || (str.length() >= 2 && str[0] == '-' && isdigit(str[1])));
+    if (isdigit(str[0]) || (str.length() >= 2 && str[0] == '-' && isdigit(str[1]))) {
+      char * end;
+      double result = 0;
+      errno = 0;
+      result = strtod(str.c_str(), &end);
+      return !(*end != '\0' || (result == 0 && (errno != 0 || end == str.c_str())));
+    } else {
+      return false;
+    }
   }
 
   operation_code::xmm_operation get_xmm_operation(char const c) const {
