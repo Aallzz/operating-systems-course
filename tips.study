@@ -1,4 +1,4 @@
-" bash ! shortcuts {{{
+bash ! shortcuts {{{
 
 !^      first argument
 !int :2     second argument
@@ -14,7 +14,7 @@
 
 "}}}
 
-" useful vim commands {{{
+useful vim commands {{{
 
 " search/replace {{{
 :%s/foo/bar/g
@@ -37,10 +37,17 @@
 
 " }}}
 
-" info sources {{{
+info sources {{{
 
 nice video about virtual memory : https://www.youtube.com/watch?v=qcBIvnQt0Bw&list=PLiwt1iVUib9s2Uo5BeYmwkDFUh70fJPxX
 
 smth about makefiles : https://www.safaribooksonline.com/library/view/managing-projects-with/0596006101/ch02.html
+
+l}}}
+
+Useful info {{{
+  Operations to find out natural word-size of a processor:
+    getconf WORD_BIT 
+    getconf LONG_BIT
 
 }}}

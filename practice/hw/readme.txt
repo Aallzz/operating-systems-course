@@ -4,6 +4,7 @@ Status:
   Shell       [checked]
   Grep        [unchecked]
   Find        [unchecked]
+  JIT         [unchecked]
 Description: 
   
   Shell - simplified version of terminal
@@ -25,3 +26,7 @@ Description:
     --size [-=+]size - files with the size less/equal/grt size
     --nlinks num - files with num hardlinks
     --exec path - call path command on the founded files
+
+  Jit - simplified jit-compiler for primitive math expressions in reverse polish notation
+    Usage: ./my_jit <file with expression> <value to pass>
+  Description: expression in file can consist of float numbers, basic math operations (+ - * /), and letter x for value, that will be passed in my_jit program. Every token in the expression must be separated with spaces. 

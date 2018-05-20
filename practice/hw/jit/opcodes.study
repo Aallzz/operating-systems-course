@@ -1,0 +1,39 @@
+pop xmm {{{
+  movdqu xmm0, [rsp]
+    F30F6F04          movdqu xmm0,[si]
+    24                db 0x24
+
+  add rsp, 16
+    48                dec ax
+    83C410            add sp,byte +0x10
+}}}
+
+push xmm {{{
+  sub rsp, 16
+    48                dec ax
+    83EC10            sub sp,byte +0x10
+  
+  movdqu [rsp], xmm0 
+    F30F7F04          movdqu [si],xmm0
+    24                db 0x24
+  
+}}}
+
+
+opcodes xmms {{{  
+  F20F5CC8          subsd xmm1,xmm0
+  F20F5CD0          subsd xmm2,xmm0
+  F20F5CD1          subsd xmm2,xmm1
+  F20F5CD2          subsd xmm2,xmm2
+  F20F58C8          addsd xmm1,xmm0
+}}}
+
+
+load to xmm {{{
+  movdqa xmm1, oword [rcx + 1214]
+    660F6F89BE04      movdqa xmm1,xmm12
+    0000              add [bx+si],al
+  
+
+}}}
+
