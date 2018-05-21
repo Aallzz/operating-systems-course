@@ -2,11 +2,13 @@
 #define MY_JIT_FUNCTION
 
 #include <vector>
+#include <string>
 #include <cstdint>
 #include <string>
 #include <cstdlib>
 #include <algorithm>
 #include <iostream>
+#include <map>
 
 #include "operation_code.h"
 #include "my_utility.h"
@@ -16,6 +18,9 @@ template<typename R>
 struct jit_funtction { 
 
   std::vector<uint8_t> function_code;
+  std::vector<std::string> function_string;
+  std::map<int, int> operation_location;
+  
   void *call;
 
   jit_funtction(const std::string& expr) {
@@ -23,8 +28,10 @@ struct jit_funtction {
 
     std::vector<double> constants;
     auto tokens = split_string(expr);
+    function_string = tokens;
     uint8_t cnt_reg{};
-   
+    int id {};
+
     for (auto const& token : tokens) {
       if (is_operation(token)) {
         uint8_t idx1 {std::min<uint8_t>(cnt_reg - 1, max_cnt_reg)};
@@ -38,6 +45,7 @@ struct jit_funtction {
         if (cnt_reg > max_cnt_reg) { 
           append(pop_xmm(max_cnt_reg + 1));
         }
+        operation_location[id] = function_code.size();
         append(op_xmm(get_xmm_operation(token[0]), idx1, idx2)); 
         if (cnt_reg > max_cnt_reg) { 
           append(push_xmm(max_cnt_reg));
@@ -60,7 +68,7 @@ struct jit_funtction {
       } else {
         throw std::invalid_argument(std::string("Unexpected token in expression: ") + token);
       }
-
+      id++;
     }
     append(mov_xmm_idx1_from_idx2(0, 1));
     append(ret);
@@ -80,19 +88,27 @@ struct jit_funtction {
     }
  
     using namespace memory_manager;
-   /* 
+    /* 
     for (uint8_t const& x : function_code) {
-       fprintf("%.2X ", x);
+       printf("%.2X ", x);
     }
-    fprintf("\n");
-     */
+    printf("\n");
+    */
     call = map(16 * function_code.size(), -1, 0);
     memcpy(call, function_code.data(), function_code.size() * sizeof(uint8_t));
-    protect(call, 16 * function_code.size(), PROT_READ | PROT_EXEC);
+    protect(call, 16 * function_code.size(), PROT_READ | PROT_WRITE | PROT_EXEC);
       
   }
 
 
+  void change(int pos, char nop) {
+    if (operation_location.count(pos)) {
+      function_code[operation_location[pos] + 9] = static_cast<uint8_t>(get_xmm_operation(nop));
+      memcpy((void*)((uint8_t*)call + operation_location[pos] + 9), function_code.data() + operation_location[pos] + 9, sizeof(uint8_t));
+      function_string[operation_location[pos]] = nop;
+    }
+  }
+  
   template<typename T>
   R operator()(T arg) const {
     return reinterpret_cast<R(*)(T)>(call)(arg);

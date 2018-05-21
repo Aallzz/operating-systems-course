@@ -16,9 +16,12 @@ int main(int argc, char* argv[]) {
   double x = strtod(argv[2], NULL);
   string expr;
   getline(fin, expr);
+  // expr = "3 x +";
   try {
     jit_funtction<double> fun(expr);
     cout << std::setprecision(2) << std::fixed << fun(x) << endl;
+   // fun.change(2, '*');
+   // cout << std::setprecision(2) << std::fixed << fun(x) << endl;
   } catch (std::invalid_argument& e) {
     cout << e.what() << endl; 
   }

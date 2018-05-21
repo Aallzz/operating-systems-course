@@ -4,7 +4,7 @@ SOURCES = my_jit.cpp \
 		  lib/memory_manager.h lib/memory_manager.cpp \
 		  lib/my_utility.h lib/my_utility.cpp \
 		  lib/operation_code.h \
-		  lib/shelllib/my_utility.h 
+		  lib/shelllib/my_utility.h lib/shelllib/my_utility.c 
 LIBS = lib/memory_manager.o lib/my_utility.o 
 OUT_LIBS = lib/shelllib/my_utility.o
 GENERATED = my_jit.o $(LIBS) $(OUT_LIBS)
