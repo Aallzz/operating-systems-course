@@ -5,6 +5,7 @@ Status:
   Grep        [unchecked]
   Find        [unchecked]
   JIT         [unchecked]
+  Lib         [unchecked]
 
 Description: 
   
@@ -32,3 +33,6 @@ Description:
     Usage: ./my_jit <file with expression> <value to pass>
     Description: expression in file can consist of float numbers, basic math operations (+ - * /), and letter x for value, that will be passed in my_jit program. Every token in the expression must be separated with spaces. 
     Additional functionality: jit_function class has special function [void change(int pos, char new_op)]to change one operation in expression without changing of the rest code
+
+  Lib - example of library usage.
+    Usage: ./my_lib <circle/square> <ind> 
