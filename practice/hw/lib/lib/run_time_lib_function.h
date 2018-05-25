@@ -7,6 +7,7 @@
 #include <string>
 #include <stdexcept>
 #include <functional>
+#include <iostream>
 
 template<typename T>
 struct run_time_lib_function;
