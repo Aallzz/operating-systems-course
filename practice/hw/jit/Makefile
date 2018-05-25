@@ -21,7 +21,7 @@ my_jit.o: my_jit.cpp
 		g++ -std=c++14 -c my_jit.cpp
 
 shell_lib: lib/shelllib/my_utility.c
-	gcc -c  lib/shelllib/my_utility.c
+	gcc -c  lib/shelllib/my_utility.c -o lib/shelllib/my_utility.o
 
 lib: $(OUT_LIBS)
 	$(MAKE) shell_lib

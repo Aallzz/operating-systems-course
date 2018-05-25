@@ -6,13 +6,14 @@ all: my_shell
 run: my_shell 
 	./my_shell
 
-my_shell: my_shell.o lib/my_utility.o 
+my_shell: my_shell.o lib/my_utility.o
 	gcc my_shell.o lib/my_utility.o -O0 -o my_shell
 
 my_shell.o: my_shell.c
 	gcc -c my_shell.c
 
 lib: lib/my_utility.c
+	echo "ASD"
 	gcc -c lib/my_utility.c -o lib/my_utility.o
 
 san: my_shell
