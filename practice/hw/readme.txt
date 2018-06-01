@@ -4,8 +4,9 @@ Status:
   Shell       [checked]
   Grep        [unchecked]
   Find        [unchecked]
-  JIT         [unchecked]
-  Lib         [unchecked]
+  JIT         [checked]
+  Lib         [checked]
+  Signals     [unchecked]
 
 Description: 
   
@@ -36,3 +37,7 @@ Description:
 
   Lib - example of library usage.
     Usage: ./my_lib <circle/square> <ind> 
+    
+  Signals - program that makes memory dump on SIGSEGV signal
+    Usage: ./my_signals <raise/str/null>
+    Description: Dependeing on the chosen option program will generate SIGSEGV signal in its specific way and print dump of memory. 

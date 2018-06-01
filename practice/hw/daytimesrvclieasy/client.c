@@ -45,7 +45,7 @@ void* fun1(void* pppp) {
       perror("fputs error");
     }
   }
-
+  
   return NULL;
 }
 

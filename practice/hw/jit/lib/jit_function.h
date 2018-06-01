@@ -97,7 +97,6 @@ struct jit_funtction {
     call = map(16 * function_code.size(), -1, 0);
     memcpy(call, function_code.data(), function_code.size() * sizeof(uint8_t));
     protect(call, 16 * function_code.size(), PROT_READ | PROT_WRITE | PROT_EXEC);
-      
   }
 
 
