@@ -12,10 +12,12 @@
 #include <stdexcept>
 #include <iostream>
 #include <set>
+#include <sstream>
 
 #if defined (__linux)
 #include "lib/my_epoll.h"
 #include <optional>
+#include "lib/thread_pool.h"
 #else
 #include "sys/event.h"
 #endif
@@ -58,32 +60,40 @@ struct server {
     std::optional<std::vector<epoll_event>> evs;
     while (evs = e.wait()) {
       for (auto const& v : evs.value()) {
-        if (v.data.fd == listenfd) {
-          int fd;
-          if ((fd = accept(listenfd, nullptr, nullptr)) < 0) {
-            std::cerr << std::string("Accept error") + strerror(errno) << std::endl;
-            continue;
-          }
-          set_nonblocking(fd);
-          try {
-            e.add(fd, EPOLLIN);
-            fds.insert(fd);
-          } catch (std::exception const& ex) {
-            std::cerr << ex.what() << std::endl;
-          }
-        } else {
-          char buffer[buffsz];
-          int rcv = recv(v.data.fd, buffer, buffsz, MSG_NOSIGNAL);
-          if (rcv == 0 && errno != EAGAIN) {
-            shutdown(v.data.fd, SHUT_RDWR);
-            close(v.data.fd);
-          } else if (rcv > 0) {
-            for (auto const& x : fds) {
-              if (x == v.data.fd) continue;
-              send(x, buffer, rcv, MSG_NOSIGNAL);
+        executor.submit([this](auto v) {
+          if (v.data.fd == listenfd) {
+            int fd;
+            if ((fd = accept(listenfd, nullptr, nullptr)) < 0) {
+              std::cerr << std::string("Accept error") + strerror(errno) << std::endl;
+              return;
+            }
+            set_nonblocking(fd);
+            try {
+              e.add(fd, EPOLLIN);
+              std::lock_guard<std::mutex> lck(mtx);
+              fds.insert(fd);
+            } catch (std::exception const& ex) {
+              std::cerr << ex.what() << std::endl;
+            }
+          } else {
+            char buffer[buffsz];
+            int rcv = recv(v.data.fd, buffer, buffsz, MSG_NOSIGNAL);
+            if (rcv == 0 && errno != EAGAIN) {
+              shutdown(v.data.fd, SHUT_RDWR);
+              close(v.data.fd);
+            } else if (rcv > 0) {
+              std::lock_guard<std::mutex> lck(mtx);
+              std::ostringstream ss;
+              ss << std::this_thread::get_id();
+              std::string s = "\n"s + ss.str();
+              for (auto const& x : fds) {
+                if (x == v.data.fd) continue;
+                send(x, buffer, rcv, MSG_NOSIGNAL);
+                send(x, s.c_str(), s.length(), MSG_NOSIGNAL); 
+              }
             }
           }
-        }
+        }, v);
       }
     }
   }
@@ -92,7 +102,9 @@ private:
   pied_piper::my_epoll e{0};
   int listenfd;
   std::set<int> fds;
-
+  
+  pied_piper::thread_pool executor;
+  std::mutex mtx;
   int port;
 
   constexpr static int buffsz = 4096;
