@@ -2,11 +2,13 @@ To unzip all projects you can use unpack.sh.
 
 Status: 
   Shell       [checked]
-  Grep        [unchecked]
-  Find        [unchecked]
+  Grep        [checked]
+  Find        [checked]
   JIT         [checked]
   Lib         [checked]
-  Signals     [unchecked]
+  Signals     [checked]
+  DayTime     [checked]
+  Chat        [unchecked]
 
 Description: 
   
@@ -41,3 +43,9 @@ Description:
   Signals - program that makes memory dump on SIGSEGV signal
     Usage: ./my_signals <raise/str/null>
     Description: Dependeing on the chosen option program will generate SIGSEGV signal in its specific way and print dump of memory. 
+
+  DayTime - client and server for daytime protocol
+
+  Chat - simple cross-platform (linux/darwin) chat.
+    Usage: 1] Start server: ./server port
+           2] Run clinets (up to 10): ./client server_address port
