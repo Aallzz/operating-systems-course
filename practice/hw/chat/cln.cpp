@@ -19,7 +19,8 @@ struct client {
   client(std::string const& address, int port) 
     : address(address), port(port) {
     
-    if((clientfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+
+    if((clientfd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0) {
       throw std::runtime_error(std::string("socket error: ") + strerror(errno));
     }
     
@@ -34,20 +35,23 @@ struct client {
     }
 
     if (connect(clientfd, reinterpret_cast<sa*>(&clientaddr), sizeof(clientaddr)) < 0) {
-      throw std::runtime_error(std::string("connect error: ") + strerror(errno));
+      if (errno == EINPROGRESS) { 
+        connected = false;
+      } else 
+        throw std::runtime_error(std::string("connect error: ") + strerror(errno));
     }
+    
+    hv[0].fd = clientfd;
+    hv[0].events = POLLIN | POLLOUT;
+
+    hv[1].fd = STDIN_FILENO;
+    hv[1].events = POLLIN;
+
   }
 
   void run() {
     char buffer[buffsz];
     char buffer2[buffsz];
-    
-    struct pollfd hv[2];
-    hv[0].fd = clientfd;
-    hv[0].events = POLLIN;
-
-    hv[1].fd = STDIN_FILENO;
-    hv[1].events = POLLIN;
 
     while (true) {
 
@@ -56,14 +60,40 @@ struct client {
       
       poll(hv, 2, -1);
       if ((hv[1].revents & POLLIN) == POLLIN) {
-        std::string s;
-        std::getline(std::cin, s);
-        write(clientfd, s.c_str(), s.length());
+        if (connected) {
+          std::string s;
+          std::getline(std::cin, s);
+          if ((hv[0].revents & POLLOUT) == POLLOUT) {
+            write(clientfd, s.c_str(), s.length());
+          }
+        }
       }
       if ((hv[0].revents & POLLIN) == POLLIN) {
-        read(clientfd, buffer2, buffsz);
-        printf("Received: %s\n", buffer2);
+        if (!connected) { 
+          std::cout << "No connectin" << std::endl;
+        } else {
+          int res = read(clientfd, buffer2, buffsz);
+          if (!res) {
+            throw std::runtime_error(std::string("Server is terminated"));
+          } 
+          printf("Received: %s\n", buffer2);
+        }
       }
+      if ((hv[0].revents & POLLOUT) == POLLOUT) {
+        if (!connected) {
+          int err {};
+          socklen_t len = sizeof(err);
+          if (getsockopt(clientfd, SOL_SOCKET, SO_ERROR, &err, &len) != -1) {
+             if (!err) {
+              connected = true;
+             } else {
+              close(clientfd);
+              throw std::runtime_error(std::string("Connection error: "));
+             }
+          }
+        }
+      }
+      
     }
   }
 
@@ -72,6 +102,9 @@ private:
   int clientfd;
   std::string address;
   int port;
+  
+  struct pollfd hv[2];
+  bool connected {true};
 
   constexpr static int buffsz = 4096;
 };

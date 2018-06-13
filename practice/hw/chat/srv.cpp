@@ -64,7 +64,7 @@ struct server {
           if (v.data.fd == listenfd) {
             int fd;
             if ((fd = accept(listenfd, nullptr, nullptr)) < 0) {
-              std::cerr << std::string("Accept error") + strerror(errno) << std::endl;
+              std::cerr << std::string("Accept error: ") + strerror(errno) << std::endl;
               return;
             }
             set_nonblocking(fd);
