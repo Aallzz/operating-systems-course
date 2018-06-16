@@ -8,7 +8,7 @@ Status:
   Lib         [checked]
   Signals     [checked]
   DayTime     [checked]
-  Chat        [unchecked]
+  Chat        [checked]
 
 Description: 
   
